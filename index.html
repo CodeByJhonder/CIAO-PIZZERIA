@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+
+<!--
+  CIAO PIZZERÍA — v1.5 "Footer Profesional + Páginas Legales"
+  Fecha: 23 de julio de 2026
+  Versión anterior: v1.4 "Carrito de Compras + Menú con Fotos"
+
+  Cambios desde v1.4 (hechos por el dueño directamente, fuera de este chat):
+  - Footer rediseñado por completo: de centrado/simple a estructura de
+    columnas tipo Back Market/Amazon (.footer-inner, .footer-col,
+    .footer-brand, .footer-tagline, .footer-links, .footer-contact,
+    .footer-bottom), con íconos sociales alineados a la izquierda y
+    línea divisoria antes del copyright.
+  - Ajustes de espaciado para que el botón flotante de WhatsApp y el
+    letrero de horario no tapen el contenido del footer.
+  - Agregado correo (contacto@ciaopizzeria.com) en la columna Contacto.
+  - Nueva columna "Legal" con enlaces a 3 páginas nuevas:
+    privacidad.html, terminos.html, cookies.html — cada una con el
+    mismo header, footer, botón de WhatsApp y "volver arriba" que el
+    resto del sitio, para mantener coherencia visual.
+  - terminos.html incluye un RIF provisional (J-33550719-0), marcado
+    explícitamente como dato pendiente de confirmar por el negocio.
+
+  Estado: todas las funciones principales trabajando; script.js no
+  cambió y sigue siendo 100% compatible (se verificaron todos los IDs
+  que usa: cartBtn, cartDrawer, orderForm, waStatus, backToTop, etc.).
+
+  Pendiente de datos reales (no funciones): precios de bebidas; RIF
+  real (reemplazar el provisional); tiempo real de delivery; link de
+  Instagram.
+
+  IMPORTANTE: al publicar, deben ir juntos en la misma carpeta raíz:
+  index.html, styles.css, script.js, privacidad.html, terminos.html,
+  cookies.html, la carpeta /img y los favicons.
+
+  Si algo se rompe en versiones futuras, esta es la versión estable
+  a la que se puede volver.
+-->
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>CIAO Pizzería | Elorza, Apure</title>
+  <meta
+    content="Pizza artesanal recién horneada en Elorza, Apure. Haz tu pedido fácil y recíbelo en tu casa. Delivery a todo Elorza, todos los días de 6:00pm a 10:00pm."
+    name="description" />
+  <!-- Open Graph (vista previa en WhatsApp, Facebook, Instagram) -->
+  <meta content="website" property="og:type" />
+  <meta content="CIAO Pizzería | Elorza, Apure" property="og:title" />
+  <meta
+    content="Pizza artesanal recién horneada en Elorza, Apure. Haz tu pedido fácil y recíbelo en tu casa. Delivery a todo Elorza, todos los días de 6:00pm a 10:00pm."
+    property="og:description" />
+  <meta content="favicon-512.png" property="og:image" />
+  <meta content="es_VE" property="og:locale" />
+  <!-- Twitter Card -->
+  <meta content="summary_large_image" name="twitter:card" />
+  <meta content="CIAO Pizzería | Elorza, Apure" name="twitter:title" />
+  <meta content="Pizza artesanal recién horneada en Elorza, Apure. Pide fácil y recibe en tu casa."
+    name="twitter:description" />
+  <meta content="favicon-512.png" name="twitter:image" />
+  <link href="favicon.ico" rel="icon" sizes="any" />
+  <link href="favicon-32.png" rel="icon" sizes="32x32" type="image/png" />
+  <link href="favicon-16.png" rel="icon" sizes="16x16" type="image/png" />
+  <link href="favicon-180.png" rel="apple-touch-icon" sizes="180x180" />
+  <link href="favicon-192.png" rel="icon" sizes="192x192" type="image/png" />
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,600&amp;family=Jost:wght@400;500;600&amp;display=swap"
+    rel="stylesheet" />
+  <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body>
+  <header>
+    <div class="nav-wrap">
+      <a aria-label="Ir al inicio de CIAO Pizzería" class="logo" href="index.html">CIAO <span>Pizzería</span></a>
+      <div class="nav-right">
+        <nav>
+          <ul id="navList">
+            <li><a href="#menu">Menú</a></li>
+            <li><a href="#nosotros">Ubicación</a></li>
+            <li><a href="#pedido">Pedir</a></li>
+            <li><a href="#faq">Preguntas</a></li>
+          </ul>
+        </nav>
+        <button aria-label="Ver carrito de pedido" class="cart-btn" id="cartBtn">
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+            stroke-width="2" viewbox="0 0 24 24">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span class="cart-badge hidden" id="cartBadge">0</span>
+        </button>
+        <button aria-expanded="false" aria-label="Abrir menú" class="menu-toggle" id="menuToggle">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-drawer-header">
+      <h3>Tu pedido</h3>
+      <button class="cart-drawer-close" id="cartDrawerClose" aria-label="Cerrar carrito">✕</button>
+    </div>
+    <div class="cart-drawer-body" id="cartDrawerBody">
+      <p class="cart-empty">Tu carrito está vacío.<br>Agrega productos desde el menú.</p>
+    </div>
+    <div class="cart-drawer-footer">
+      <div class="cart-drawer-total">
+        <span>Total</span>
+        <span class="amount" id="cartDrawerTotal">$0</span>
+      </div>
+      <a href="#pedido" class="cart-checkout-btn" id="cartCheckoutBtn">Ir a confirmar pedido</a>
+    </div>
+  </div>
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <span class="eyebrow">Elorza · Apure · Venezuela</span>
+        <h1>Pizza recién<br /><em>horneada</em>,<br />al estilo CIAO</h1>
+        <p class="lead">Masa artesanal, ingredientes frescos y el sabor italiano que ya es parte de Elorza. Pide en
+          minutos y la llevamos hasta tu casa.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="#pedido">Hacer un pedido</a>
+          <a class="btn btn-ghost" href="#menu">Ver el menú</a>
+        </div>
+      </div>
+      <div aria-hidden="true" class="pizza-disc">
+        <div class="pepperoni" style="top:20%; left:30%;"></div>
+        <div class="pepperoni" style="top:35%; left:60%;"></div>
+        <div class="pepperoni" style="top:55%; left:25%;"></div>
+        <div class="pepperoni" style="top:60%; left:55%;"></div>
+        <div class="pepperoni" style="top:25%; left:50%;"></div>
+        <div class="basil" style="top:45%; left:42%;"></div>
+        <div class="basil" style="top:65%; left:38%;"></div>
+        <div class="basil" style="top:30%; left:65%;"></div>
+      </div>
+    </div>
+  </section>
+  <div class="promo-strip">
+    <div class="promo-track">
+      <div class="promo-inner">
+        <span class="promo-tag">🔥 Oferta del día</span>
+        <span class="promo-text">2 pizzas medianas + refresco por <strong>$12</strong></span>
+        <a class="promo-btn" href="#pedido">Pedir ahora</a>
+      </div>
+      <div aria-hidden="true" class="promo-inner">
+        <span class="promo-tag">🔥 Oferta del día</span>
+        <span class="promo-text">2 pizzas medianas + refresco por <strong>$12</strong></span>
+        <a class="promo-btn" href="#pedido">Pedir ahora</a>
+      </div>
+    </div>
+  </div>
+  <section class="menu" id="menu">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Nuestro menú</span>
+        <h2>Hecha como en Italia,<br />pensada para Elorza</h2>
+        <p>Elige una categoría para ver las opciones disponibles.</p>
+      </div>
+      <div class="cat-grid">
+        <a class="cat-card" href="#menu-pizzas">
+          <div class="cat-card-img img-margherita">
+            <img alt="Pizza Margherita" loading="lazy" src="img/pizza-margherita.jpg" />
+          </div>
+          <div class="cat-card-label">Pizzas</div>
+        </a>
+        <a class="cat-card" href="#menu-hotdogs">
+          <div class="cat-card-img img-hotdog">
+            <img alt="Perro Caliente" loading="lazy" src="img/hotdog-sencillo.jpg" />
+          </div>
+          <div class="cat-card-label">Perros Calientes</div>
+        </a>
+        <a class="cat-card" href="#menu-salchipapa">
+          <div class="cat-card-img img-salchipapa">
+            <img alt="Salchipapa" loading="lazy" src="img/cat-salchipapa.jpg" />
+          </div>
+          <div class="cat-card-label">Salchipapa</div>
+        </a>
+        <a class="cat-card" href="#menu-hamburguesas">
+          <div class="cat-card-img img-burger">
+            <img alt="Hamburguesa" loading="lazy" src="img/burger-sencilla.jpg" />
+          </div>
+          <div class="cat-card-label">Hamburguesas</div>
+        </a>
+        <a class="cat-card" href="#menu-bebidas">
+          <div class="cat-card-img img-bebidas">
+            <img alt="Bebidas" loading="lazy" src="img/cat-bebidas.jpg" />
+          </div>
+          <div class="cat-card-label">Bebidas</div>
+        </a>
+        <a class="cat-card" href="#menu-adicionales">
+          <div class="cat-card-img img-adicionales">
+            <span class="placeholder-emoji">➕</span>
+          </div>
+          <div class="cat-card-label">Adicionales</div>
+        </a>
+      </div>
+    </div>
+  </section>
+  <section class="menu" id="menu-pizzas" style="background:var(--crema);">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Pizzas</span>
+        <h2>Nuestras pizzas</h2>
+        <p>Disponibles en tamaño Pequeña, Mediana y Grande.</p>
+      </div>
+      <h3 style="font-family:'Fraunces',serif; color:var(--rojo-oscuro); margin-bottom:16px;">Clásicas</h3>
+      <div class="menu-grid" style="margin-bottom:44px;">
+        <div class="menu-card">
+          <div class="menu-card-img img-margherita">
+            <span class="tag">Clásica</span>
+            <img alt="Pizza Margarita" loading="lazy" src="img/pizza-margherita.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Margarita</h3>
+            <p class="desc">Salsa, queso mozzarella y jamón.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Margarita" data-price="5.26"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$5.26</span></button><button class="size-btn" data-name="Pizza Margarita"
+                data-price="7.63" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$7.63</span></button><button class="size-btn" data-name="Pizza Margarita"
+                data-price="9.47" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$9.47</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Clásica</span>
+            <img alt="Pizza Tocineta" loading="lazy" src="img/pizza-tocineta.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Tocineta</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón y tocineta.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Tocineta" data-price="6.32"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$6.32</span></button><button class="size-btn" data-name="Pizza Tocineta"
+                data-price="9.48" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$9.48</span></button><button class="size-btn" data-name="Pizza Tocineta"
+                data-price="12.1" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$12.1</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Clásica</span>
+            <img alt="Pizza Hawaiana" loading="lazy" src="img/pizza-hawaiana.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Hawaiana</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón y piña.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Hawaiana" data-price="6.32"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$6.32</span></button><button class="size-btn" data-name="Pizza Hawaiana"
+                data-price="9.48" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$9.48</span></button><button class="size-btn" data-name="Pizza Hawaiana"
+                data-price="12.1" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$12.1</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Clásica</span>
+            <img alt="Pizza Pollo" loading="lazy" src="img/pizza-pollo.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Pollo</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón y pollo.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Pollo" data-price="6.5" data-size="Pequeña"
+                type="button"><span class="sb-label">Pequeña</span><span class="sb-price">$6.5</span></button><button
+                class="size-btn" data-name="Pizza Pollo" data-price="9.5" data-size="Mediana" type="button"><span
+                  class="sb-label">Mediana</span><span class="sb-price">$9.5</span></button><button class="size-btn"
+                data-name="Pizza Pollo" data-price="12.5" data-size="Grande" type="button"><span
+                  class="sb-label">Grande</span><span class="sb-price">$12.5</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-pepperoni">
+            <span class="tag">Clásica</span>
+            <img alt="Pizza Pepperoni" loading="lazy" src="img/pizza-pepperoni.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Pepperoni</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón y pepperoni.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Pepperoni" data-price="6.32"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$6.32</span></button><button class="size-btn" data-name="Pizza Pepperoni"
+                data-price="9.48" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$9.48</span></button><button class="size-btn" data-name="Pizza Pepperoni"
+                data-price="12.1" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$12.1</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Clásica</span>
+            <img alt="Pizza Salchicha" loading="lazy" src="img/pizza-salchicha.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Salchicha</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón y salchicha.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Salchicha" data-price="5.79"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$5.79</span></button><button class="size-btn" data-name="Pizza Salchicha"
+                data-price="8.95" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$8.95</span></button><button class="size-btn" data-name="Pizza Salchicha"
+                data-price="11" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$11</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-llanera">
+            <span class="tag">Clásica</span>
+            <img alt="Pizza Carne Mechada" loading="lazy" src="img/pizza-llanera.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Carne Mechada</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón y carne mechada.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Carne Mechada" data-price="6.5"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$6.5</span></button><button class="size-btn" data-name="Pizza Carne Mechada"
+                data-price="9.5" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$9.5</span></button><button class="size-btn" data-name="Pizza Carne Mechada"
+                data-price="12.5" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$12.5</span></button></div>
+          </div>
+        </div>
+      </div>
+      <h3 style="font-family:'Fraunces',serif; color:var(--rojo-oscuro); margin-bottom:16px;">Especiales</h3>
+      <div class="menu-grid">
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza Princesa" loading="lazy" src="img/pizza-princesa.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Princesa</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón, tocineta, salchichas, maíz y pimentón.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Princesa" data-price="6.84"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$6.84</span></button><button class="size-btn" data-name="Pizza Princesa"
+                data-price="10" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$10</span></button><button class="size-btn" data-name="Pizza Princesa"
+                data-price="13" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$13</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza Primavera" loading="lazy" src="img/pizza-primavera.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Primavera</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón, tocineta y maíz.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Primavera" data-price="6.84"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$6.84</span></button><button class="size-btn" data-name="Pizza Primavera"
+                data-price="10" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$10</span></button><button class="size-btn" data-name="Pizza Primavera"
+                data-price="13" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$13</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza Deliciosa" loading="lazy" src="img/pizza-deliciosa.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Deliciosa</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón, tocineta, anchoas, pollo y pimentón.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Deliciosa" data-price="7.84"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$7.84</span></button><button class="size-btn" data-name="Pizza Deliciosa"
+                data-price="11" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$11</span></button><button class="size-btn" data-name="Pizza Deliciosa"
+                data-price="14" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$14</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza Caprichosa" loading="lazy" src="img/pizza-caprichosa.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Caprichosa</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón, tocineta, anchoas, champiñones y pimentón.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Caprichosa" data-price="7.84"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$7.84</span></button><button class="size-btn" data-name="Pizza Caprichosa"
+                data-price="11" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$11</span></button><button class="size-btn" data-name="Pizza Caprichosa"
+                data-price="14" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$14</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza Charcutera" loading="lazy" src="img/pizza-charcutera.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Charcutera</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón, tocineta, pepperoni y salchicha.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Charcutera" data-price="7.37"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$7.37</span></button><button class="size-btn" data-name="Pizza Charcutera"
+                data-price="11" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$11</span></button><button class="size-btn" data-name="Pizza Charcutera"
+                data-price="13.94" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$13.94</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza A tu gusto" loading="lazy" src="img/pizza-a-tu-gusto.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>A tu gusto</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón + 3 ingredientes a tu gusto.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza A tu gusto" data-price="7.37"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$7.37</span></button><button class="size-btn" data-name="Pizza A tu gusto"
+                data-price="11" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$11</span></button><button class="size-btn" data-name="Pizza A tu gusto"
+                data-price="13.94" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$13.94</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza Granjera" loading="lazy" src="img/pizza-granjera.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Granjera</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón, tocineta, pollo, champiñones, maíz y pimentón.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Granjera" data-price="8"
+                data-size="Pequeña" type="button"><span class="sb-label">Pequeña</span><span
+                  class="sb-price">$8</span></button><button class="size-btn" data-name="Pizza Granjera"
+                data-price="11.5" data-size="Mediana" type="button"><span class="sb-label">Mediana</span><span
+                  class="sb-price">$11.5</span></button><button class="size-btn" data-name="Pizza Granjera"
+                data-price="14.95" data-size="Grande" type="button"><span class="sb-label">Grande</span><span
+                  class="sb-price">$14.95</span></button></div>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-cuatro">
+            <span class="tag">Especial</span>
+            <img alt="Pizza Ciao" loading="lazy" src="img/pizza-ciao.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Ciao</h3>
+            <p class="desc">Salsa, queso mozzarella, jamón, tocineta, carne mechada, champiñones, pepperoni, maíz y
+              pimentón.</p>
+            <div class="size-rows"><button class="size-btn" data-name="Pizza Ciao" data-price="10" data-size="Pequeña"
+                type="button"><span class="sb-label">Pequeña</span><span class="sb-price">$10</span></button><button
+                class="size-btn" data-name="Pizza Ciao" data-price="13" data-size="Mediana" type="button"><span
+                  class="sb-label">Mediana</span><span class="sb-price">$13</span></button><button class="size-btn"
+                data-name="Pizza Ciao" data-price="16.5" data-size="Grande" type="button"><span
+                  class="sb-label">Grande</span><span class="sb-price">$16.5</span></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="menu" id="menu-hotdogs" style="background:var(--crema-2);">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Perros calientes</span>
+        <h2>Nuestros perros calientes</h2>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-card">
+          <div class="menu-card-img img-hotdog">
+            <span class="tag">Mini</span>
+            <img alt="Mini Perro" loading="lazy" src="img/hotdog-mini.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Mini Perro</h3>
+            <p class="desc">Pan, salchicha, ensalada, papitas, queso y salsas.</p>
+            <button class="add-cart-btn" data-name="Mini Perro" data-price="1.3" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$1.3</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-hotdog">
+            <span class="tag">Especial</span>
+            <img alt="Perro CIAO" loading="lazy" src="img/hotdog-ciao.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Perro CIAO</h3>
+            <p class="desc">Pan, salchicha, ensalada, carne mechada, queso amarillo, tocineta y maíz.</p>
+            <button class="add-cart-btn" data-name="Perro CIAO" data-price="4.5" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$4.5</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-hotdog">
+            <span class="tag">Clásico</span>
+            <img alt="Especial" loading="lazy" src="img/hotdog-sencillo.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Especial</h3>
+            <p class="desc">Pan, salchicha, ensalada, papitas, queso, jamón, tocineta y salsas.</p>
+            <button class="add-cart-btn" data-name="Especial" data-price="3.5" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$3.5</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="menu" id="menu-salchipapa" style="background:var(--crema);">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Salchipapa</span>
+        <h2>Nuestras salchipapas</h2>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-card">
+          <div class="menu-card-img img-salchipapa">
+            <span class="tag">Clásica</span>
+            <img alt="Salchipapa Clásica" loading="lazy" src="img/salchipapa-clasica.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Clásica</h3>
+            <p class="desc">Papas fritas con salsas.</p>
+            <button class="add-cart-btn" data-name="Salchipapa Clásica" data-price="3" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$3</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-salchipapa">
+            <span class="tag">Especial</span>
+            <img alt="Salchipapa" loading="lazy" src="img/salchipapa-especial.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Salchipapa</h3>
+            <p class="desc">Papas fritas, queso gratinado, salchichas y sus salsas.</p>
+            <button class="add-cart-btn" data-name="Salchipapa Especial" data-price="5.5" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$5.5</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="menu" id="menu-hamburguesas" style="background:var(--crema-2);">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Hamburguesas</span>
+        <h2>Nuestras hamburguesas</h2>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-card">
+          <div class="menu-card-img img-burger">
+            <span class="tag">Clásica</span>
+            <img alt="Clásica" loading="lazy" src="img/burger-sencilla.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Clásica</h3>
+            <p class="desc">Pan, croqueta, tocineta, jamón, queso amarillo, cebolla caramelizada, salsa de la casa y
+              vegetales.</p>
+            <button class="add-cart-btn" data-name="Hamburguesa Clásica" data-price="5.5" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$5.5</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-burger">
+            <span class="tag">Doble</span>
+            <img alt="Doble" loading="lazy" src="img/burger-ciao-doble.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Doble</h3>
+            <p class="desc">Pan, doble croqueta, doble tocineta, doble jamón, doble queso amarillo, salsa de la casa,
+              cebolla caramelizada y vegetales.</p>
+            <button class="add-cart-btn" data-name="Hamburguesa Doble" data-price="7.5" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$7.5</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-burger">
+            <span class="tag">Especial</span>
+            <img alt="Hamburguesa Pollo Crispy" loading="lazy" src="img/burger-pollo-crispy.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Pollo Crispy</h3>
+            <p class="desc">Pan brioche, jamón, queso amarillo, tocineta, cebolla caramelizada, papitas, pollo crispy,
+              vegetales y salsa de la casa.</p>
+            <button class="add-cart-btn" data-name="Hamburguesa Pollo Crispy" data-price="7" type="button"><span>Agregar
+                al carrito</span><span class="acb-price">$7</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-burger">
+            <span class="tag">Especial</span>
+            <img alt="Hamburguesa Chuleta" loading="lazy" src="img/burger-chuleta.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Chuleta</h3>
+            <p class="desc">Pan, jamón, queso amarillo, tocineta, cebolla caramelizada, papitas, chuleta, vegetales y
+              salsa de la casa.</p>
+            <button class="add-cart-btn" data-name="Hamburguesa Chuleta" data-price="7" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$7</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-burger">
+            <span class="tag">Mixta</span>
+            <img alt="Hamburguesa Mixta" loading="lazy" src="img/burger-mixta.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Mixta</h3>
+            <p class="desc">Pan brioche, jamón, queso amarillo, tocineta, cebolla caramelizada, papitas, pollo, chuleta,
+              vegetales y salsa de la casa.</p>
+            <button class="add-cart-btn" data-name="Hamburguesa Mixta" data-price="8" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$8</span></button>
+          </div>
+        </div>
+        <div class="menu-card">
+          <div class="menu-card-img img-burger">
+            <span class="tag">Premium</span>
+            <img alt="Hamburguesa Ciao" loading="lazy" src="img/burger-ciao.jpg" />
+          </div>
+          <div class="menu-card-body">
+            <h3>Ciao</h3>
+            <p class="desc">Pan brioche, jamón, queso amarillo, tocineta, cebolla caramelizada, papitas, pollo, carne,
+              chuleta, huevo, vegetales y salsa de la casa.</p>
+            <button class="add-cart-btn" data-name="Hamburguesa Ciao" data-price="10" type="button"><span>Agregar al
+                carrito</span><span class="acb-price">$10</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="menu" id="menu-bebidas" style="background:var(--crema);">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Bebidas</span>
+        <h2>Nuestras bebidas</h2>
+        <p>Precios pendientes de confirmar — pronto los actualizamos.</p>
+      </div>
+      <div class="simple-list">
+        <div class="simple-item">
+          <h3>Refrescos 400 ml</h3><span class="note">Precio pendiente</span>
+        </div>
+        <div class="simple-item">
+          <h3>Refrescos 1 lt</h3><span class="note">Precio pendiente</span>
+        </div>
+        <div class="simple-item">
+          <h3>Refrescos 1.5 lt</h3><span class="note">Precio pendiente</span>
+        </div>
+        <div class="simple-item">
+          <h3>Refrescos 2 lt</h3><span class="note">Precio pendiente</span>
+        </div>
+        <div class="simple-item">
+          <h3>Jugos Naturales</h3><span class="note">Precio pendiente</span>
+        </div>
+        <div class="simple-item">
+          <h3>Cervezas</h3><span class="note">Precio pendiente</span>
+        </div>
+        <div class="simple-item">
+          <h3>Gatorade</h3><span class="note">Precio pendiente</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="menu" id="menu-adicionales" style="background:var(--crema-2);">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Adicionales</span>
+        <h2>Personaliza tu pizza</h2>
+        <p>Agrega estos ingredientes extra a cualquier pizza, según el tamaño.</p>
+      </div>
+      <div class="simple-list">
+        <div class="simple-item">
+          <h3>Borde de Tequeños</h3>
+        </div>
+        <div class="simple-item">
+          <h3>Borde de Queso</h3>
+        </div>
+        <div class="simple-item">
+          <h3>Pepperoni</h3>
+        </div>
+        <div class="simple-item">
+          <h3>Champiñón</h3>
+        </div>
+        <div class="simple-item">
+          <h3>Maíz</h3>
+        </div>
+        <div class="simple-item">
+          <h3>U otro ingrediente de su preferencia</h3>
+        </div>
+      </div>
+      <div class="adicionales-price-table">
+        <h4>Precio por tamaño</h4>
+        <div class="adicionales-price-row"><span>Pequeña</span><span class="price">$0.80</span></div>
+        <div class="adicionales-price-row"><span>Mediana</span><span class="price">$1.00</span></div>
+        <div class="adicionales-price-row"><span>Grande</span><span class="price">$1.50</span></div>
+      </div>
+    </div>
+  </section>
+  <section id="nosotros">
+    <div class="section-inner about">
+      <div>
+        <span class="eyebrow" style="color:var(--rojo);">Sobre CIAO</span>
+        <h2>Tradición italiana,<br />sabor llanero</h2>
+        <p>CIAO Pizzería nació para llevar una pizza de verdad a Elorza: masa de fermentación lenta, horneado en el
+          punto justo y combinaciones que mezclan recetas italianas con ingredientes de nuestra tierra.</p>
+        <p>Hacemos cada pizza al momento de tu pedido, así que el tiempo de espera puede variar un poco — pero vale la
+          pena.</p>
+      </div>
+      <div class="info-card">
+        <h3>Visítanos o pide</h3>
+        <div class="info-line"><span class="ic">📍</span><span><a
+              href="https://www.google.com/maps/place/Elorza+7011,+Apure,+Venezuela/@7.06214,-69.5054167,60m/data=!3m1!1e3!4m6!3m5!1s0x8e708dd7755e8577:0xb4831b105993e387!8m2!3d7.0634022!4d-69.497001!16zL20vMDcxc3g5?hl=es-ES"
+              rel="noopener" style="color:var(--oro); text-decoration:underline;" target="_blank">Elorza, Municipio
+              Rómulo Gallegos, Apure, Venezuela — ver en Maps</a></span></div>
+        <div class="info-line"><span class="ic">🕒</span><span>Todos los días · 6:00 pm – 10:00 pm</span></div>
+        <div class="info-line"><span class="ic">📞</span><span>+58 0426-4057916</span></div>
+        <div class="info-line"><span class="ic">🍕</span><span>Pedido mínimo: 1 pizza</span></div>
+        <div class="info-line"><span class="ic">🛵</span><span>Delivery a todo Elorza</span></div>
+      </div>
+    </div>
+    <div class="map-wrap">
+      <iframe allowfullscreen="" class="map-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=7.062207911350661,-69.50544390368567&amp;z=17&amp;output=embed"
+        title="Ubicación de CIAO Pizzería en Elorza, Apure">
+      </iframe>
+    </div>
+  </section>
+  <section class="pedido" id="pedido">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Haz tu pedido</span>
+        <h2>Llena el formulario,<br />lo enviamos por WhatsApp</h2>
+        <p>Completa tus datos, elige tus pizzas y al confirmar se abrirá WhatsApp con tu pedido ya redactado, listo para
+          enviar.</p>
+        <p style="margin-top:14px; font-weight:600; color:var(--oro);">🛵 Hacemos delivery a todo Elorza</p>
+      </div>
+      <form id="orderForm">
+        <div class="field">
+          <label for="nombre">Nombre completo</label>
+          <input id="nombre" placeholder="Ej: María Pérez" required="" type="text" />
+        </div>
+        <div class="field">
+          <label for="telefono">Tu número de teléfono</label>
+          <input id="telefono" placeholder="Ej: 0426-1234567" required="" type="tel" />
+        </div>
+        <div class="field">
+          <label for="direccion">Dirección de entrega</label>
+          <textarea id="direccion" placeholder="Calle, sector, punto de referencia en Elorza" required=""
+            rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Tu pedido</label>
+          <div class="checkout-cart-list" id="checkoutCartBody">
+            <p class="cart-empty">Tu carrito está vacío.<br />Agrega productos desde el menú de arriba.</p>
+          </div>
+          <p class="cart-required-note hidden" id="cartRequiredNote">⚠️ Agrega al menos un producto a tu carrito antes
+            de enviar el pedido.</p>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total estimado</span>
+          <span class="total-amount" id="totalAmount">$0</span>
+        </div>
+        <div class="field">
+          <label for="pago">Forma de pago</label>
+          <select id="pago">
+            <option>Efectivo</option>
+            <option>Pago móvil</option>
+            <option>Divisas</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="notas">Notas adicionales (opcional)</label>
+          <textarea id="notas" placeholder="Ej: sin cebolla, tocar el portón, etc." rows="2"></textarea>
+        </div>
+        <button class="submit-btn" type="submit">Enviar pedido por WhatsApp</button>
+        <p class="form-note">Al confirmar se abrirá WhatsApp con tu pedido completo listo para enviar a CIAO Pizzería.
+        </p>
+      </form>
+    </div>
+  </section>
+  <section class="faq" id="faq">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow" style="color:var(--rojo);">Preguntas frecuentes</span>
+        <h2>¿Tienes dudas?<br />Aquí te respondemos</h2>
+        <p>Si tu pregunta no está aquí, escríbenos directo por WhatsApp.</p>
+      </div>
+      <div class="faq-list" id="faqList">
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>¿Hacen pedidos para eventos o cantidades grandes?</span>
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Sí, hacemos pedidos grandes para cumpleaños, reuniones y eventos. Te recomendamos escribirnos por
+              WhatsApp con anticipación para coordinar cantidad y hora de entrega.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>¿Aceptan pago en dólares?</span>
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Sí, aceptamos dólares en efectivo, además de pago móvil y bolívares en efectivo. Puedes indicar tu forma
+              de pago preferida al hacer el pedido.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>¿Cuánto tarda el delivery?</span>
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>El tiempo estimado de entrega en Elorza es de 30 a 45 minutos, dependiendo de la zona y la cantidad de
+              pedidos que tengamos en el momento.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>¿Cuál es el pedido mínimo?</span>
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>El pedido mínimo es de 1 pizza. No hay monto mínimo adicional para solicitar delivery dentro de Elorza.
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>¿Puedo personalizar mi pizza?</span>
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Claro, puedes indicar cualquier cambio (quitar o agregar ingredientes) en el campo de notas del
+              formulario, o directamente por WhatsApp.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <button aria-label="Volver arriba" class="back-to-top" id="backToTop" type="button">
+    <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+      stroke-width="2.4" viewbox="0 0 24 24">
+      <line x1="12" x2="12" y1="19" y2="5"></line>
+      <polyline points="6 11 12 5 18 11"></polyline>
+    </svg>
+  </button>
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-card">
+      <div class="confirm-icon">
+        <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+          stroke-width="3" viewbox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h3>¡Listo!</h3>
+      <p>Tu pedido fue armado correctamente.</p>
+      <p>Te esperamos en WhatsApp para confirmarlo 🍕</p>
+      <div aria-hidden="true" class="confirm-spinner"></div>
+    </div>
+  </div>
+  <div class="wa-status" id="waStatus"><span class="dot"></span><span id="waStatusText">Consultando horario…</span>
+  </div>
+  <a aria-label="Escríbenos por WhatsApp" class="wa-float"
+    href="https://wa.me/584264057916?text=Hola%20CIAO%20Pizzer%C3%ADa%2C%20quisiera%20hacer%20un%20pedido" id="waFloat"
+    rel="noopener" target="_blank">
+    <span aria-hidden="true" class="wa-pulse"></span>
+    <svg aria-hidden="true" fill="currentColor" viewbox="0 0 32 32">
+      <path
+        d="M16.004 3C9.377 3 4 8.373 4 15c0 2.31.65 4.47 1.78 6.31L4 29l7.87-1.74A11.9 11.9 0 0 0 16.004 27C22.63 27 28 21.627 28 15S22.63 3 16.004 3Zm0 21.6c-1.9 0-3.68-.5-5.22-1.38l-.375-.22-4.67 1.03 1.05-4.55-.24-.39A9.55 9.55 0 0 1 5.4 15c0-5.85 4.76-10.6 10.604-10.6S26.6 9.15 26.6 15 21.848 24.6 16.004 24.6Zm5.86-7.95c-.32-.16-1.9-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.26-.19.21-.38.24-.7.08-.32-.16-1.35-.5-2.57-1.58-.95-.85-1.6-1.9-1.78-2.22-.19-.32-.02-.49.14-.65.14-.14.32-.38.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.85.4-.29.32-1.12 1.09-1.12 2.66s1.15 3.08 1.31 3.29c.16.21 2.26 3.45 5.48 4.84.77.33 1.37.53 1.83.68.77.24 1.47.21 2.02.13.62-.09 1.9-.78 2.17-1.53.27-.75.27-1.4.19-1.53-.08-.13-.29-.21-.61-.37Z">
+      </path>
+    </svg>
+  </a>
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-col footer-brand">
+        <div class="logo">CIAO <span style="color:var(--oro);">Pizzería</span></div>
+        <p class="footer-tagline">Masa de fermentación lenta, ingredientes frescos y el sabor italiano que ya es parte
+          de Elorza.</p>
+        <div class="social-row">
+          <a aria-label="WhatsApp" class="social-icon" href="https://wa.me/584264057916" rel="noopener" target="_blank">
+            <svg aria-hidden="true" viewbox="0 0 32 32">
+              <path
+                d="M16.004 3C9.377 3 4 8.373 4 15c0 2.31.65 4.47 1.78 6.31L4 29l7.87-1.74A11.9 11.9 0 0 0 16.004 27C22.63 27 28 21.627 28 15S22.63 3 16.004 3Zm0 21.6c-1.9 0-3.68-.5-5.22-1.38l-.375-.22-4.67 1.03 1.05-4.55-.24-.39A9.55 9.55 0 0 1 5.4 15c0-5.85 4.76-10.6 10.604-10.6S26.6 9.15 26.6 15 21.848 24.6 16.004 24.6Zm5.86-7.95c-.32-.16-1.9-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.26-.19.21-.38.24-.7.08-.32-.16-1.35-.5-2.57-1.58-.95-.85-1.6-1.9-1.78-2.22-.19-.32-.02-.49.14-.65.14-.14.32-.38.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.85.4-.29.32-1.12 1.09-1.12 2.66s1.15 3.08 1.31 3.29c.16.21 2.26 3.45 5.48 4.84.77.33 1.37.53 1.83.68.77.24 1.47.21 2.02.13.62-.09 1.9-.78 2.17-1.53.27-.75.27-1.4.19-1.53-.08-.13-.29-.21-.61-.37Z">
+              </path>
+            </svg>
+          </a>
+          <a aria-label="TikTok" class="social-icon" href="https://www.tiktok.com/@enyerber.jos.paz" rel="noopener"
+            target="_blank">
+            <svg aria-hidden="true" viewbox="0 0 32 32">
+              <path
+                d="M23.5 9.6a6.8 6.8 0 0 1-4.2-1.44v9.4a7.1 7.1 0 1 1-6.1-7.03v3.16a3.95 3.95 0 1 0 2.8 3.78V3h3.1a6.8 6.8 0 0 0 4.4 4.4v2.2Z">
+              </path>
+            </svg>
+          </a>
+          <a aria-label="Instagram (próximamente)" class="social-icon" href="#">
+            <svg aria-hidden="true" viewbox="0 0 32 32">
+              <path
+                d="M11 3h10a8 8 0 0 1 8 8v10a8 8 0 0 1-8 8H11a8 8 0 0 1-8-8V11a8 8 0 0 1 8-8Zm0 2.6a5.4 5.4 0 0 0-5.4 5.4v10A5.4 5.4 0 0 0 11 26.4h10a5.4 5.4 0 0 0 5.4-5.4V11A5.4 5.4 0 0 0 21 5.6H11Zm5 4.6a6.8 6.8 0 1 1 0 13.6 6.8 6.8 0 0 1 0-13.6Zm0 2.6a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4Zm7-3.9a1.4 1.4 0 1 1-2.8 0 1.4 1.4 0 0 1 2.8 0Z">
+              </path>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Enlaces</h4>
+        <ul class="footer-links">
+          <li><a href="#menu">Menú</a></li>
+          <li><a href="#nosotros">Ubicación</a></li>
+          <li><a href="#pedido">Pedir</a></li>
+          <li><a href="#faq">Preguntas frecuentes</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <ul class="footer-links footer-contact">
+          <li>Elorza, Municipio Rómulo Gallegos, Apure</li>
+          <li><a href="tel:+584264057916">+58 0426-4057916</a></li>
+          <li><a href="mailto:contacto@ciaopizzeria.com">contacto@ciaopizzeria.com</a></li>
+          <li>Todos los días, 6:00 pm – 10:00 pm</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul class="footer-links">
+          <li><a href="privacidad.html">Política de privacidad</a></li>
+          <li><a href="terminos.html">Términos de servicio</a></li>
+          <li><a href="cookies.html">Política de cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 CIAO Pizzería. Hecha con cariño para nuestro pueblo.</p>
+    </div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+
+</html>
