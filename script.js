@@ -22,7 +22,7 @@
   });
 
   // Horario inteligente del botón de WhatsApp
-  // Horario de la tienda: todos los días · 6:00 pm (18h) a 10:00 pm (22h)
+  // Horario de la tienda: todos los días · 6:00 pm (18h) a 12:00 am medianoche (24h)
   // Hora de Venezuela: America/Caracas (UTC-4), calculada aunque el celular esté en otra zona horaria
   function checkStoreStatus() {
     const waStatus = document.getElementById('waStatus');
@@ -31,17 +31,14 @@
 
     const nowVzla = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Caracas' }));
     const hour = nowVzla.getHours();
-    const isOpen = hour >= 18 && hour < 22;
+    const isOpen = hour >= 18; // abre 6pm y cierra a medianoche (hora 24 = hora 0 del día siguiente)
 
     if (isOpen) {
       waStatusText.textContent = 'Estamos abiertos, ¡escríbenos!';
       waStatus.classList.remove('closed');
       waFloat.classList.remove('closed');
     } else {
-      const msg = hour < 18
-        ? 'Cerrado ahora — abrimos hoy a las 6:00 pm'
-        : 'Cerrado ahora — abrimos mañana a las 6:00 pm';
-      waStatusText.textContent = msg;
+      waStatusText.textContent = 'Cerrado ahora — abrimos hoy a las 6:00 pm';
       waStatus.classList.add('closed');
       waFloat.classList.add('closed');
     }
@@ -73,12 +70,27 @@
   // ==================================================================
   let cart = [];
 
-  function addToCart(name, price) {
+  // Precio de cada ingrediente adicional según el tamaño de la pizza a la
+  // que se agrega (coincide con la tabla mostrada en la sección Adicionales)
+  const ADICIONAL_PRICE_BY_SIZE = { 'Pequeña': 0.80, 'Mediana': 1.00, 'Grande': 1.50 };
+  const ADICIONALES = ['Borde de Tequeños', 'Borde de Queso', 'Pepperoni', 'Champiñón', 'Maíz', 'Otro ingrediente'];
+
+  // Extrae el tamaño de un nombre de producto como "Pizza Pepperoni (Grande)"
+  function getPizzaSize(name) {
+    const match = name.match(/\((Pequeña|Mediana|Grande)\)$/);
+    return match ? match[1] : null;
+  }
+
+  function isPizza(name) {
+    return name.startsWith('Pizza ') && getPizzaSize(name);
+  }
+
+  function addToCart(name, price, noPrice = false) {
     const existing = cart.find(item => item.name === name);
     if (existing) {
       existing.qty += 1;
     } else {
-      cart.push({ name, price, qty: 1 });
+      cart.push({ name, price, qty: 1, noPrice, extras: [] });
     }
     renderCart();
   }
@@ -98,23 +110,67 @@
     renderCart();
   }
 
+  function addExtra(name, extraName) {
+    const item = cart.find(i => i.name === name);
+    if (!item) return;
+    if (item.extras.some(e => e.name === extraName)) return; // ya agregado
+    const size = getPizzaSize(item.name);
+    const price = ADICIONAL_PRICE_BY_SIZE[size] || 0;
+    item.extras.push({ name: extraName, price });
+    renderCart();
+  }
+
+  function removeExtra(name, extraName) {
+    const item = cart.find(i => i.name === name);
+    if (!item) return;
+    item.extras = item.extras.filter(e => e.name !== extraName);
+    renderCart();
+  }
+
+  // El total suma los productos con precio confirmado + todos los
+  // ingredientes extra agregados. Los productos "sin precio" (bebidas)
+  // van aparte, se confirman por WhatsApp.
   function cartTotal() {
-    return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    return cart.reduce((sum, item) => {
+      if (item.noPrice) return sum;
+      const extrasTotal = item.extras.reduce((s, e) => s + e.price, 0);
+      return sum + item.price * item.qty + extrasTotal;
+    }, 0);
   }
 
   function cartLineHTML(item) {
+    const extrasHTML = item.extras.map(extra => `
+      <div class="cart-extra-row">
+        <span class="extra-name">+ ${extra.name}</span>
+        <span class="extra-price">$${extra.price.toFixed(2)}</span>
+        <button type="button" class="extra-remove" data-extra="${extra.name}" aria-label="Quitar ingrediente">✕</button>
+      </div>
+    `).join('');
+
+    const addExtraHTML = isPizza(item.name) ? `
+      <div class="cart-extra-add">
+        <select class="extra-select">
+          ${ADICIONALES.map(a => `<option value="${a}">${a}</option>`).join('')}
+        </select>
+        <button type="button" class="extra-add-btn">+ Ingrediente</button>
+      </div>
+    ` : '';
+
     return `
       <div class="cart-line" data-name="${item.name}">
-        <div class="cart-line-info">
-          <div class="cart-line-name">${item.name}</div>
-          <div class="cart-line-price">$${item.price.toFixed(2)} c/u</div>
+        <div class="cart-line-main">
+          <div class="cart-line-info">
+            <div class="cart-line-name">${item.name}</div>
+            <div class="cart-line-price${item.noPrice ? ' no-price' : ''}">${item.noPrice ? 'Precio a confirmar' : `$${item.price.toFixed(2)} c/u`}</div>
+          </div>
+          <div class="cart-line-qty-ctrl">
+            <button type="button" class="cart-qty-btn cart-qty-minus" aria-label="Quitar uno">−</button>
+            <span class="cart-line-qty-num">${item.qty}</span>
+            <button type="button" class="cart-qty-btn cart-qty-plus" aria-label="Agregar uno">+</button>
+          </div>
+          <button type="button" class="cart-line-remove" aria-label="Eliminar">✕</button>
         </div>
-        <div class="cart-line-qty-ctrl">
-          <button type="button" class="cart-qty-btn cart-qty-minus" aria-label="Quitar uno">−</button>
-          <span class="cart-line-qty-num">${item.qty}</span>
-          <button type="button" class="cart-qty-btn cart-qty-plus" aria-label="Agregar uno">+</button>
-        </div>
-        <button type="button" class="cart-line-remove" aria-label="Eliminar">✕</button>
+        ${(extrasHTML || addExtraHTML) ? `<div class="cart-extras">${extrasHTML}${addExtraHTML}</div>` : ''}
       </div>
     `;
   }
@@ -128,6 +184,7 @@
 
     const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
     const total = cartTotal();
+    const noPriceItems = cart.filter(item => item.noPrice);
 
     if (totalItems > 0) {
       badge.textContent = totalItems;
@@ -143,8 +200,15 @@
     drawerBody.innerHTML = cart.length ? linesHTML : emptyHTML;
     if (checkoutBody) checkoutBody.innerHTML = cart.length ? linesHTML : checkoutEmptyHTML;
 
-    drawerTotal.textContent = `$${total.toFixed(2)}`;
-    if (totalAmount) totalAmount.textContent = `$${total.toFixed(2)}`;
+    // El total muestra el monto numérico, y si hay bebidas u otros productos
+    // sin precio, se agregan al final como "+ nombre, nombre"
+    let totalText = `$${total.toFixed(2)}`;
+    if (noPriceItems.length) {
+      const extras = noPriceItems.map(i => i.qty > 1 ? `${i.qty}x ${i.name}` : i.name).join(', ');
+      totalText += ` + ${extras}`;
+    }
+    drawerTotal.textContent = totalText;
+    if (totalAmount) totalAmount.textContent = totalText;
   }
 
   // Animación: un ícono "vuela" desde el botón presionado hasta el carrito
@@ -185,7 +249,8 @@
     btn.addEventListener('click', () => {
       const name = btn.dataset.name;
       const price = parseFloat(btn.dataset.price);
-      addToCart(name, price);
+      const noPrice = btn.dataset.noprice === 'true';
+      addToCart(name, price, noPrice);
       flyToCart(btn);
       btn.classList.add('just-added');
       setTimeout(() => btn.classList.remove('just-added'), 700);
@@ -205,7 +270,7 @@
     });
   });
 
-  // Clicks dentro de las líneas del carrito (sumar, restar, eliminar)
+  // Clicks dentro de las líneas del carrito (sumar, restar, eliminar, ingredientes)
   function handleCartLineClick(e) {
     const line = e.target.closest('.cart-line');
     if (!line) return;
@@ -217,6 +282,11 @@
       changeQty(name, -1);
     } else if (e.target.classList.contains('cart-line-remove')) {
       removeFromCart(name);
+    } else if (e.target.classList.contains('extra-remove')) {
+      removeExtra(name, e.target.dataset.extra);
+    } else if (e.target.classList.contains('extra-add-btn')) {
+      const select = line.querySelector('.extra-select');
+      if (select) addExtra(name, select.value);
     }
   }
   document.getElementById('cartDrawerBody').addEventListener('click', handleCartLineClick);
@@ -262,15 +332,29 @@
     const pago = document.getElementById('pago').value;
     const notas = document.getElementById('notas').value.trim();
 
-    const lines = cart.map(item => `• ${item.qty} x ${item.name}`).join('\n');
+    const lines = cart.map(item => {
+      let line = `• ${item.qty} x ${item.name}`;
+      if (item.extras && item.extras.length) {
+        const extrasText = item.extras.map(e => `   ↳ + ${e.name} ($${e.price.toFixed(2)})`).join('\n');
+        line += `\n${extrasText}`;
+      }
+      return line;
+    }).join('\n');
     const total = cartTotal();
+    const noPriceItems = cart.filter(item => item.noPrice);
+
+    let totalLine = `$${total.toFixed(2)}`;
+    if (noPriceItems.length) {
+      const extras = noPriceItems.map(i => i.qty > 1 ? `${i.qty}x ${i.name}` : i.name).join(', ');
+      totalLine += ` + ${extras}`;
+    }
 
     let mensaje = `¡Hola CIAO Pizzería! 🍕 Quiero hacer un pedido:\n\n`;
     mensaje += `*Nombre:* ${nombre}\n`;
     mensaje += `*Teléfono:* ${telefono}\n`;
     mensaje += `*Dirección:* ${direccion}\n\n`;
     mensaje += `*Pedido:*\n${lines}\n\n`;
-    mensaje += `*Total estimado:* $${total.toFixed(2)}\n`;
+    mensaje += `*Total estimado:* ${totalLine}\n`;
     mensaje += `*Pago:* ${pago}\n`;
     if (notas) mensaje += `*Notas:* ${notas}\n`;
 
