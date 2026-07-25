@@ -1,4 +1,4 @@
-  // Botón "Volver arriba"
+// Botón "Volver arriba"
   const backToTop = document.getElementById('backToTop');
   window.addEventListener('scroll', () => {
     if (window.scrollY > 500) {
@@ -226,7 +226,7 @@
 
     const flyer = document.createElement('div');
     flyer.className = 'fly-to-cart';
-    flyer.textContent = '🛒';
+    flyer.textContent = '\u{1F6D2}';
     flyer.style.left = `${startX}px`;
     flyer.style.top = `${startY}px`;
     document.body.appendChild(flyer);
@@ -349,7 +349,7 @@
       totalLine += ` + ${extras}`;
     }
 
-    let mensaje = `¡Hola CIAO Pizzería! 🍕 Quiero hacer un pedido:\n\n`;
+    let mensaje = `¡Hola CIAO Pizzería! \u{1F355} Quiero hacer un pedido:\n\n`;
     mensaje += `*Nombre:* ${nombre}\n`;
     mensaje += `*Teléfono:* ${telefono}\n`;
     mensaje += `*Dirección:* ${direccion}\n\n`;
