@@ -1,4 +1,4 @@
-// Botón "Volver arriba"
+  // Botón "Volver arriba"
   const backToTop = document.getElementById('backToTop');
   window.addEventListener('scroll', () => {
     if (window.scrollY > 500) {
@@ -47,7 +47,7 @@
   setInterval(checkStoreStatus, 60000); // revisa cada minuto
 
 
-  const WHATSAPP_NUMBER = "584264057916";
+  const WHATSAPP_NUMBER = "584269124842";
 
   // Menú desplegable móvil
   const toggle = document.getElementById('menuToggle');

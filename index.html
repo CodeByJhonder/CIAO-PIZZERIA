@@ -1,29 +1,40 @@
 <!DOCTYPE html>
 
 <!--
-  CIAO PIZZERÍA — v1.5 "Footer Profesional + Páginas Legales"
-  Fecha: 23 de julio de 2026
-  Versión anterior: v1.4 "Carrito de Compras + Menú con Fotos"
+  CIAO PIZZERÍA — v1.6 "Ingredientes Extra + Pulido Visual del Hero"
+  Fecha: 25 de julio de 2026
+  Versión anterior: v1.5 "Footer Profesional + Páginas Legales"
 
-  Cambios desde v1.4 (hechos por el dueño directamente, fuera de este chat):
-  - Footer rediseñado por completo: de centrado/simple a estructura de
-    columnas tipo Back Market/Amazon (.footer-inner, .footer-col,
-    .footer-brand, .footer-tagline, .footer-links, .footer-contact,
-    .footer-bottom), con íconos sociales alineados a la izquierda y
-    línea divisoria antes del copyright.
-  - Ajustes de espaciado para que el botón flotante de WhatsApp y el
-    letrero de horario no tapen el contenido del footer.
-  - Agregado correo (contacto@ciaopizzeria.com) en la columna Contacto.
-  - Nueva columna "Legal" con enlaces a 3 páginas nuevas:
-    privacidad.html, terminos.html, cookies.html — cada una con el
-    mismo header, footer, botón de WhatsApp y "volver arriba" que el
-    resto del sitio, para mantener coherencia visual.
-  - terminos.html incluye un RIF provisional (J-33550719-0), marcado
-    explícitamente como dato pendiente de confirmar por el negocio.
+  Cambios desde v1.5:
+  - Horario actualizado a medianoche: todos los días 6:00 pm – 12:00 am
+    (antes cerraba 10:00 pm). Actualizado en index.html, cookies.html,
+    privacidad.html, terminos.html, meta descripciones y script.js
+    (checkStoreStatus ya no necesita distinguir "hoy/mañana").
+  - Sección Adicionales: ahora los 6 ingredientes extra se agregan
+    directamente a cada pizza dentro del carrito (no como items
+    aparte). El precio se calcula solo según el tamaño de esa pizza
+    ($0.80 Pequeña / $1.00 Mediana / $1.50 Grande). Se ve en el carrito,
+    en el checkout y en el mensaje de WhatsApp con sangría (↳).
+  - Bebidas: se pueden agregar al carrito con botón "Agregar", se
+    muestran como "Precio a confirmar" y en el total aparecen como
+    "$X + nombre de la bebida" en vez de sumar $0.
+  - Hero: la pizza ilustrada con CSS se reemplazó por una foto real
+    (Margherita), circular, con sombra y animación sutil de flotación.
+  - Nueva fila de confianza bajo los botones del hero: delivery,
+    horario y masa artesanal (datos reales, sin inventar reseñas).
+  - Franja superior: el texto de "oferta" (que ya no existe) se
+    cambió por una frase de identidad de marca sobre la masa y el
+    horneado.
+  - FAQ de pago actualizado: ya no menciona bolívares en efectivo,
+    ahora dice pesos colombianos (dato real del negocio).
+  - Formulario de pedido: forma de pago ahora es Pago móvil (por
+    defecto), Dólares o Pesos colombianos — se quitó "Efectivo".
+  - Corregido un emoji que se veía como símbolo roto (�) en el
+    mensaje de WhatsApp, reemplazándolo por su escape Unicode
+    (\u{1F355} y \u{1F6D2}) para que sea inmune a problemas de
+    codificación del archivo.
 
-  Estado: todas las funciones principales trabajando; script.js no
-  cambió y sigue siendo 100% compatible (se verificaron todos los IDs
-  que usa: cartBtn, cartDrawer, orderForm, waStatus, backToTop, etc.).
+  Estado: todas las funciones principales trabajando.
 
   Pendiente de datos reales (no funciones): precios de bebidas; RIF
   real (reemplazar el provisional); tiempo real de delivery; link de
@@ -728,7 +739,7 @@
               rel="noopener" style="color:var(--oro); text-decoration:underline;" target="_blank">Elorza, Municipio
               Rómulo Gallegos, Apure, Venezuela — ver en Maps</a></span></div>
         <div class="info-line"><span class="ic">🕒</span><span>Todos los días · 6:00 pm – 12:00 am</span></div>
-        <div class="info-line"><span class="ic">📞</span><span>+58 0426-4057916</span></div>
+        <div class="info-line"><span class="ic">📞</span><span>+58 0426-9124842</span></div>
         <div class="info-line"><span class="ic">🍕</span><span>Pedido mínimo: 1 pizza</span></div>
         <div class="info-line"><span class="ic">🛵</span><span>Delivery a todo Elorza</span></div>
       </div>
@@ -878,7 +889,7 @@
   <div class="wa-status" id="waStatus"><span class="dot"></span><span id="waStatusText">Consultando horario…</span>
   </div>
   <a aria-label="Escríbenos por WhatsApp" class="wa-float"
-    href="https://wa.me/584264057916?text=Hola%20CIAO%20Pizzer%C3%ADa%2C%20quisiera%20hacer%20un%20pedido" id="waFloat"
+    href="https://wa.me/584269124842?text=Hola%20CIAO%20Pizzer%C3%ADa%2C%20quisiera%20hacer%20un%20pedido" id="waFloat"
     rel="noopener" target="_blank">
     <span aria-hidden="true" class="wa-pulse"></span>
     <svg aria-hidden="true" fill="currentColor" viewbox="0 0 32 32">
@@ -894,7 +905,7 @@
         <p class="footer-tagline">Masa de fermentación lenta, ingredientes frescos y el sabor italiano que ya es parte
           de Elorza.</p>
         <div class="social-row">
-          <a aria-label="WhatsApp" class="social-icon" href="https://wa.me/584264057916" rel="noopener" target="_blank">
+          <a aria-label="WhatsApp" class="social-icon" href="https://wa.me/584269124842" rel="noopener" target="_blank">
             <svg aria-hidden="true" viewbox="0 0 32 32">
               <path
                 d="M16.004 3C9.377 3 4 8.373 4 15c0 2.31.65 4.47 1.78 6.31L4 29l7.87-1.74A11.9 11.9 0 0 0 16.004 27C22.63 27 28 21.627 28 15S22.63 3 16.004 3Zm0 21.6c-1.9 0-3.68-.5-5.22-1.38l-.375-.22-4.67 1.03 1.05-4.55-.24-.39A9.55 9.55 0 0 1 5.4 15c0-5.85 4.76-10.6 10.604-10.6S26.6 9.15 26.6 15 21.848 24.6 16.004 24.6Zm5.86-7.95c-.32-.16-1.9-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.26-.19.21-.38.24-.7.08-.32-.16-1.35-.5-2.57-1.58-.95-.85-1.6-1.9-1.78-2.22-.19-.32-.02-.49.14-.65.14-.14.32-.38.48-.56.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.73-1.76-1-2.41-.26-.63-.53-.54-.73-.55h-.62c-.21 0-.56.08-.85.4-.29.32-1.12 1.09-1.12 2.66s1.15 3.08 1.31 3.29c.16.21 2.26 3.45 5.48 4.84.77.33 1.37.53 1.83.68.77.24 1.47.21 2.02.13.62-.09 1.9-.78 2.17-1.53.27-.75.27-1.4.19-1.53-.08-.13-.29-.21-.61-.37Z">
@@ -931,7 +942,7 @@
         <h4>Contacto</h4>
         <ul class="footer-links footer-contact">
           <li>Elorza, Municipio Rómulo Gallegos, Apure</li>
-          <li><a href="tel:+584264057916">+58 0426-4057916</a></li>
+          <li><a href="tel:+584269124842">+58 0426-9124842</a></li>
           <li><a href="mailto:contacto@ciaopizzeria.com">contacto@ciaopizzeria.com</a></li>
           <li>Todos los días, 6:00 pm – 12:00 am</li>
         </ul>
