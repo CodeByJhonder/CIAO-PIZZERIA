@@ -314,6 +314,19 @@
   renderCart(); // estado inicial (carrito vacío al cargar la página)
 
 
+  // Guarda un pedido en la tabla "pedidos" de Supabase.
+  // Si falla (sin internet, Supabase caído, etc.), no interrumpe el
+  // flujo del cliente — el pedido ya se envió por WhatsApp de todas formas.
+  async function guardarPedidoEnSupabase(pedido) {
+    try {
+      if (typeof supabaseClient === 'undefined') return;
+      const { error } = await supabaseClient.from('pedidos').insert(pedido);
+      if (error) console.error('No se pudo guardar el pedido en Supabase:', error.message);
+    } catch (err) {
+      console.error('Error de conexión con Supabase:', err);
+    }
+  }
+
   // Construir mensaje y abrir WhatsApp
   document.getElementById('orderForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -360,6 +373,26 @@
 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
+
+    // Guardar el pedido en Supabase para que aparezca en el panel de
+    // administración (no bloquea el envío a WhatsApp si esto falla)
+    guardarPedidoEnSupabase({
+      cliente_nombre: nombre,
+      cliente_telefono: telefono,
+      direccion: direccion,
+      forma_pago: pago,
+      notas: notas || null,
+      items: cart.map(item => ({
+        nombre: item.name,
+        cantidad: item.qty,
+        precio: item.noPrice ? null : item.price,
+        sin_precio: !!item.noPrice,
+        extras: (item.extras || []).map(e => ({ nombre: e.name, precio: e.price }))
+      })),
+      total: total,
+      estado: 'Nuevo',
+      es_prueba: false
+    });
 
     // Mostrar confirmación visual de que el pedido se armó correctamente
     const confirmOverlay = document.getElementById('confirmOverlay');

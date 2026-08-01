@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Panel de Pedidos | CIAO Pizzería</title>
+<meta content="noindex, nofollow" name="robots"/>
+<link href="favicon.ico" rel="icon" sizes="any"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,600&amp;family=Jost:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="admin.css" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ==================== PANTALLA DE LOGIN ==================== -->
+<div class="login-screen" id="loginScreen">
+  <form class="login-card" id="loginForm">
+    <div class="login-logo">CIAO <span>Pizzería</span></div>
+    <p class="login-sub">Panel de pedidos — acceso restringido</p>
+    <div class="field">
+      <label for="loginEmail">Correo</label>
+      <input id="loginEmail" required type="email" autocomplete="username"/>
+    </div>
+    <div class="field">
+      <label for="loginPassword">Contraseña</label>
+      <input id="loginPassword" required type="password" autocomplete="current-password"/>
+    </div>
+    <p class="login-error hidden" id="loginError">Correo o contraseña incorrectos.</p>
+    <button class="login-btn" type="submit">Ingresar</button>
+  </form>
+</div>
+
+<!-- ==================== PANEL (oculto hasta autenticar) ==================== -->
+<div class="admin-app hidden" id="adminApp">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo">CIAO <span>Pizzería</span></div>
+      <span class="sidebar-tag">Panel de pedidos</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link active" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Pedidos
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn" type="button">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1>Pedidos</h1>
+        <span class="live-dot" id="liveDot" title="Conexión en vivo"></span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-outline" id="testOrderBtn" type="button">+ Pedido de prueba</button>
+        <button class="btn-outline" id="exportCsvBtn" type="button">Exportar CSV</button>
+      </div>
+    </header>
+
+    <!-- ---------- MÉTRICAS ---------- -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Pedidos de hoy</span>
+        <span class="kpi-value" id="kpiHoy">0</span>
+      </div>
+      <div class="kpi-card kpi-pendiente">
+        <span class="kpi-label">Pendientes</span>
+        <span class="kpi-value" id="kpiPendientes">0</span>
+      </div>
+      <div class="kpi-card kpi-camino">
+        <span class="kpi-label">En camino</span>
+        <span class="kpi-value" id="kpiCamino">0</span>
+      </div>
+      <div class="kpi-card kpi-ventas">
+        <span class="kpi-label">Ventas de hoy (estimado)</span>
+        <span class="kpi-value" id="kpiVentas">$0</span>
+      </div>
+    </section>
+
+    <!-- ---------- FILTROS ---------- -->
+    <section class="filters-row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" placeholder="Buscar por cliente, teléfono, N° de pedido o producto…" type="text"/>
+      </div>
+      <div class="status-tabs" id="statusTabs">
+        <button class="status-tab active" data-status="Todos" type="button">Todos</button>
+        <button class="status-tab" data-status="Nuevo" type="button">Nuevo</button>
+        <button class="status-tab" data-status="Preparando" type="button">Preparando</button>
+        <button class="status-tab" data-status="En camino" type="button">En camino</button>
+        <button class="status-tab" data-status="Entregado" type="button">Entregado</button>
+        <button class="status-tab" data-status="Cancelado" type="button">Cancelado</button>
+      </div>
+    </section>
+
+    <!-- ---------- TABLA DE PEDIDOS ---------- -->
+    <section class="orders-wrap">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Hora</th>
+            <th>Cliente</th>
+            <th>Productos</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+          <!-- filas generadas por JS -->
+        </tbody>
+      </table>
+      <p class="orders-empty hidden" id="ordersEmpty">No hay pedidos que coincidan con la búsqueda.</p>
+      <p class="orders-loading" id="ordersLoading">Cargando pedidos…</p>
+    </section>
+
+  </main>
+</div>
+
+<!-- ==================== MODAL DE DETALLE ==================== -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-card">
+    <div class="detail-header">
+      <h2 id="detailTitle">Pedido #0</h2>
+      <button aria-label="Cerrar" class="detail-close" id="detailClose" type="button">✕</button>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <!-- contenido generado por JS -->
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

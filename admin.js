@@ -1,0 +1,415 @@
+// ============================================================
+// PANEL DE ADMINISTRACIÓN — CIAO Pizzería
+// Requiere supabase-config.js cargado antes que este archivo.
+// ============================================================
+
+const ESTADOS = ['Nuevo', 'Preparando', 'En camino', 'Entregado', 'Cancelado'];
+const SIGUIENTE_ESTADO = {
+  'Nuevo': 'Preparando',
+  'Preparando': 'En camino',
+  'En camino': 'Entregado',
+};
+const STATUS_CLASS = {
+  'Nuevo': 'badge-Nuevo',
+  'Preparando': 'badge-Preparando',
+  'En camino': 'badge-EnCamino',
+  'Entregado': 'badge-Entregado',
+  'Cancelado': 'badge-Cancelado',
+};
+
+let pedidosCache = [];
+let filtroEstado = 'Todos';
+let filtroTexto = '';
+let realtimeChannel = null;
+
+// ---------------------------------------------------------------
+// AUTENTICACIÓN
+// ---------------------------------------------------------------
+const loginScreen = document.getElementById('loginScreen');
+const adminApp = document.getElementById('adminApp');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+
+async function checkSession() {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) {
+    mostrarPanel();
+  } else {
+    mostrarLogin();
+  }
+}
+
+function mostrarLogin() {
+  loginScreen.classList.remove('hidden');
+  adminApp.classList.add('hidden');
+  if (realtimeChannel) {
+    supabaseClient.removeChannel(realtimeChannel);
+    realtimeChannel = null;
+  }
+}
+
+function mostrarPanel() {
+  loginScreen.classList.add('hidden');
+  adminApp.classList.remove('hidden');
+  cargarPedidos();
+  suscribirseATiempoReal();
+}
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  loginError.classList.add('hidden');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) {
+    loginError.textContent = 'Correo o contraseña incorrectos.';
+    loginError.classList.remove('hidden');
+    return;
+  }
+  mostrarPanel();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  mostrarLogin();
+});
+
+// ---------------------------------------------------------------
+// CARGA DE PEDIDOS
+// ---------------------------------------------------------------
+async function cargarPedidos() {
+  const loadingEl = document.getElementById('ordersLoading');
+  loadingEl.classList.remove('hidden');
+
+  const { data, error } = await supabaseClient
+    .from('pedidos')
+    .select('*')
+    .order('creado_en', { ascending: false });
+
+  loadingEl.classList.add('hidden');
+
+  if (error) {
+    console.error('Error cargando pedidos:', error.message);
+    return;
+  }
+  pedidosCache = data || [];
+  renderTodo();
+}
+
+function suscribirseATiempoReal() {
+  if (realtimeChannel) return;
+  realtimeChannel = supabaseClient
+    .channel('pedidos-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => {
+      cargarPedidos();
+    })
+    .subscribe();
+}
+
+// ---------------------------------------------------------------
+// UTILIDADES
+// ---------------------------------------------------------------
+function esHoy(fechaISO) {
+  const fecha = new Date(fechaISO);
+  const hoy = new Date();
+  return fecha.getFullYear() === hoy.getFullYear() &&
+         fecha.getMonth() === hoy.getMonth() &&
+         fecha.getDate() === hoy.getDate();
+}
+
+function formatearHora(fechaISO) {
+  const fecha = new Date(fechaISO);
+  const horaStr = fecha.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+  if (esHoy(fechaISO)) return horaStr;
+  const fechaStr = fecha.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit' });
+  return `${fechaStr} ${horaStr}`;
+}
+
+function resumenProductos(items) {
+  if (!items || !items.length) return '—';
+  return items.map(it => `${it.cantidad}x ${it.nombre}`).join(', ');
+}
+
+function textoBusquedaPedido(pedido) {
+  const items = (pedido.items || []).map(it => it.nombre).join(' ');
+  return `${pedido.id} ${pedido.cliente_nombre} ${pedido.cliente_telefono} ${items}`.toLowerCase();
+}
+
+// ---------------------------------------------------------------
+// RENDER: MÉTRICAS
+// ---------------------------------------------------------------
+function renderKpis() {
+  const reales = pedidosCache.filter(p => !p.es_prueba);
+  const deHoy = reales.filter(p => esHoy(p.creado_en));
+
+  const pendientes = reales.filter(p => p.estado === 'Nuevo' || p.estado === 'Preparando').length;
+  const enCamino = reales.filter(p => p.estado === 'En camino').length;
+  const ventasHoy = deHoy
+    .filter(p => p.estado !== 'Cancelado')
+    .reduce((sum, p) => sum + Number(p.total || 0), 0);
+
+  document.getElementById('kpiHoy').textContent = deHoy.length;
+  document.getElementById('kpiPendientes').textContent = pendientes;
+  document.getElementById('kpiCamino').textContent = enCamino;
+  document.getElementById('kpiVentas').textContent = `$${ventasHoy.toFixed(2)}`;
+}
+
+// ---------------------------------------------------------------
+// RENDER: TABLA
+// ---------------------------------------------------------------
+function pedidosFiltrados() {
+  return pedidosCache.filter(p => {
+    if (filtroEstado !== 'Todos' && p.estado !== filtroEstado) return false;
+    if (filtroTexto && !textoBusquedaPedido(p).includes(filtroTexto)) return false;
+    return true;
+  });
+}
+
+function renderTabla() {
+  const tbody = document.getElementById('ordersBody');
+  const emptyEl = document.getElementById('ordersEmpty');
+  const lista = pedidosFiltrados();
+
+  if (!lista.length) {
+    tbody.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+  emptyEl.classList.add('hidden');
+
+  tbody.innerHTML = lista.map(p => {
+    const siguiente = SIGUIENTE_ESTADO[p.estado];
+    const botonHTML = siguiente
+      ? `<button class="advance-btn" data-id="${p.id}" data-siguiente="${siguiente}" type="button">Marcar "${siguiente}"</button>`
+      : `<button class="advance-btn" disabled type="button">—</button>`;
+
+    return `
+      <tr class="order-row ${p.es_prueba ? 'es-prueba' : ''}" data-id="${p.id}">
+        <td class="order-id">#${p.id}${p.es_prueba ? '<span class="prueba-badge">PRUEBA</span>' : ''}</td>
+        <td class="order-hora">${formatearHora(p.creado_en)}</td>
+        <td>
+          <div class="order-cliente-nombre">${escapeHTML(p.cliente_nombre)}</div>
+          <div class="order-cliente-tel">${escapeHTML(p.cliente_telefono)}</div>
+        </td>
+        <td class="order-productos">${escapeHTML(resumenProductos(p.items))}</td>
+        <td class="order-total">$${Number(p.total || 0).toFixed(2)}</td>
+        <td><span class="badge ${STATUS_CLASS[p.estado] || ''}">${p.estado}</span></td>
+        <td>${botonHTML}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderTodo() {
+  renderKpis();
+  renderTabla();
+}
+
+// ---------------------------------------------------------------
+// EVENTOS: BÚSQUEDA Y FILTROS
+// ---------------------------------------------------------------
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  filtroTexto = e.target.value.trim().toLowerCase();
+  renderTabla();
+});
+
+document.getElementById('statusTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.status-tab');
+  if (!btn) return;
+  document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  filtroEstado = btn.dataset.status;
+  renderTabla();
+});
+
+// ---------------------------------------------------------------
+// EVENTOS: AVANZAR ESTADO / ABRIR DETALLE
+// ---------------------------------------------------------------
+document.getElementById('ordersBody').addEventListener('click', async (e) => {
+  const advanceBtn = e.target.closest('.advance-btn');
+  if (advanceBtn && !advanceBtn.disabled) {
+    e.stopPropagation();
+    const id = advanceBtn.dataset.id;
+    const siguiente = advanceBtn.dataset.siguiente;
+    await actualizarEstado(id, siguiente);
+    return;
+  }
+  const row = e.target.closest('.order-row');
+  if (row) {
+    abrirDetalle(row.dataset.id);
+  }
+});
+
+async function actualizarEstado(id, nuevoEstado) {
+  const { error } = await supabaseClient
+    .from('pedidos')
+    .update({ estado: nuevoEstado })
+    .eq('id', id);
+  if (error) {
+    alert('No se pudo actualizar el estado: ' + error.message);
+    return;
+  }
+  // La suscripción en tiempo real recargará la tabla; por si acaso, forzamos también:
+  cargarPedidos();
+}
+
+// ---------------------------------------------------------------
+// MODAL DE DETALLE
+// ---------------------------------------------------------------
+const detailOverlay = document.getElementById('detailOverlay');
+const detailBody = document.getElementById('detailBody');
+const detailTitle = document.getElementById('detailTitle');
+
+function abrirDetalle(id) {
+  const pedido = pedidosCache.find(p => String(p.id) === String(id));
+  if (!pedido) return;
+
+  detailTitle.textContent = `Pedido #${pedido.id}`;
+
+  const itemsHTML = (pedido.items || []).map(it => {
+    const precioTxt = it.sin_precio ? 'Precio a confirmar' : `$${Number(it.precio || 0).toFixed(2)} c/u`;
+    const extrasHTML = (it.extras || []).map(ex =>
+      `<div class="detail-item-extra">+ ${escapeHTML(ex.nombre)} ($${Number(ex.precio || 0).toFixed(2)})</div>`
+    ).join('');
+    return `
+      <div class="detail-item">
+        <div class="detail-item-main">
+          <span>${it.cantidad} x ${escapeHTML(it.nombre)}</span>
+          <span>${precioTxt}</span>
+        </div>
+        ${extrasHTML}
+      </div>
+    `;
+  }).join('');
+
+  detailBody.innerHTML = `
+    <div>
+      <div class="detail-section-label">Cliente</div>
+      <div class="detail-grid">
+        <div><strong>Nombre:</strong> ${escapeHTML(pedido.cliente_nombre)}</div>
+        <div><strong>Teléfono:</strong> ${escapeHTML(pedido.cliente_telefono)}</div>
+        <div style="grid-column:1 / -1;"><strong>Dirección:</strong> ${escapeHTML(pedido.direccion)}</div>
+        <div><strong>Pago:</strong> ${escapeHTML(pedido.forma_pago)}</div>
+        <div><strong>Fecha:</strong> ${new Date(pedido.creado_en).toLocaleString('es-VE')}</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="detail-section-label">Productos</div>
+      <div class="detail-items">${itemsHTML || '<p>Sin productos</p>'}</div>
+      <div class="detail-total-row"><span>Total</span><span>$${Number(pedido.total || 0).toFixed(2)}</span></div>
+    </div>
+
+    ${pedido.notas ? `
+    <div>
+      <div class="detail-section-label">Notas</div>
+      <p>${escapeHTML(pedido.notas)}</p>
+    </div>` : ''}
+
+    <div>
+      <div class="detail-section-label">Estado del pedido</div>
+      <div class="detail-status-row">
+        <select class="status-select" id="detailStatusSelect">
+          ${ESTADOS.map(s => `<option value="${s}" ${s === pedido.estado ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detailStatusSelect').addEventListener('change', async (e) => {
+    await actualizarEstado(pedido.id, e.target.value);
+  });
+
+  detailOverlay.classList.add('open');
+}
+
+document.getElementById('detailClose').addEventListener('click', () => {
+  detailOverlay.classList.remove('open');
+});
+detailOverlay.addEventListener('click', (e) => {
+  if (e.target === detailOverlay) detailOverlay.classList.remove('open');
+});
+
+// ---------------------------------------------------------------
+// PEDIDO DE PRUEBA
+// ---------------------------------------------------------------
+document.getElementById('testOrderBtn').addEventListener('click', async () => {
+  const pedidoPrueba = {
+    cliente_nombre: 'Cliente de Prueba',
+    cliente_telefono: '0426-0000000',
+    direccion: 'Sector de prueba, casa de ejemplo, Elorza',
+    forma_pago: 'Pago móvil',
+    notas: 'Este es un pedido de prueba generado desde el panel.',
+    items: [
+      { nombre: 'Pizza Pepperoni (Mediana)', cantidad: 1, precio: 9.48, sin_precio: false, extras: [] },
+      { nombre: 'Refrescos 400 ml', cantidad: 1, precio: null, sin_precio: true, extras: [] },
+    ],
+    total: 9.48,
+    estado: 'Nuevo',
+    es_prueba: true,
+  };
+  const { error } = await supabaseClient.from('pedidos').insert(pedidoPrueba);
+  if (error) {
+    alert('No se pudo crear el pedido de prueba: ' + error.message);
+  }
+});
+
+// ---------------------------------------------------------------
+// EXPORTAR CSV
+// ---------------------------------------------------------------
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  if (!pedidosCache.length) {
+    alert('No hay pedidos para exportar todavía.');
+    return;
+  }
+
+  const encabezados = ['ID', 'Fecha', 'Cliente', 'Teléfono', 'Dirección', 'Productos', 'Pago', 'Notas', 'Total', 'Estado', 'Es prueba'];
+  const filas = pedidosCache.map(p => [
+    p.id,
+    new Date(p.creado_en).toLocaleString('es-VE'),
+    p.cliente_nombre,
+    p.cliente_telefono,
+    p.direccion,
+    resumenProductos(p.items),
+    p.forma_pago,
+    p.notas || '',
+    Number(p.total || 0).toFixed(2),
+    p.estado,
+    p.es_prueba ? 'Sí' : 'No',
+  ]);
+
+  const csvEscape = (val) => {
+    const str = String(val ?? '');
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const csvContent = [encabezados, ...filas]
+    .map(fila => fila.map(csvEscape).join(','))
+    .join('\n');
+
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fechaArchivo = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `pedidos_ciao_pizzeria_${fechaArchivo}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// ---------------------------------------------------------------
+// INICIO
+// ---------------------------------------------------------------
+checkSession();
