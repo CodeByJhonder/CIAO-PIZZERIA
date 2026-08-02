@@ -47,7 +47,7 @@
   setInterval(checkStoreStatus, 60000); // revisa cada minuto
 
 
-  const WHATSAPP_NUMBER = "584269124842";
+  const WHATSAPP_NUMBER = "584264057916";
 
   // Menú desplegable móvil
   const toggle = document.getElementById('menuToggle');
